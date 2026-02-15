@@ -1,7 +1,18 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.kotlin.ksp)
+    alias(libs.plugins.dagger.hilt)
+}
+
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(localPropertiesFile.inputStream())
 }
 
 android {
@@ -18,14 +29,24 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField(
+            "String", "TMDB_API_KEY", "\"${localProperties.getProperty("TMDB_API_KEY", "")}\""
+        )
+        buildConfigField(
+            "String", "TMDB_BASE_URL", "\"https://api.themoviedb.org/3/\""
+        )
+        buildConfigField(
+            "String", "TMDB_IMAGE_BASE_URL", "\"https://image.tmdb.org/t/p/\""
+        )
+
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             )
         }
     }
@@ -38,6 +59,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -50,11 +72,65 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.material.icons)
+
+    implementation(libs.androidx.ui)
+    implementation(libs.core.ktx)
+    implementation(libs.androidx.compose.runtime)
+    implementation(libs.androidx.junit.ktx)
+
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
+    implementation(libs.hilt.navigation.compose)
+
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
+
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.kotlinx.serialization)
+    implementation(libs.kotlinx.serialization.json)
+
+    implementation(platform(libs.okhttp.bom))
+    implementation(libs.okhttp)
+    implementation(libs.logging.interceptor)
+
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
+
+    implementation(libs.paging.runtime)
+    implementation(libs.paging.compose)
+
+    implementation(libs.navigation.compose)
+
+    implementation(libs.coroutines.core)
+    implementation(libs.coroutines.android)
+
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.google.truth)
+    testImplementation(libs.mockk)
+    testImplementation(libs.turbine)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.mockwebserver)
+    testImplementation(libs.paging.common)
+
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+
+    androidTestImplementation(libs.room.testing)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.google.truth)
+    androidTestImplementation(libs.turbine)
+    androidTestImplementation(libs.androidx.arch.core.testing)
+    androidTestImplementation(libs.hilt.android.testing)
+    androidTestImplementation(libs.navigation.testing)
+    kspAndroidTest(libs.hilt.android.compiler)
+
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
