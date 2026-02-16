@@ -1,6 +1,5 @@
 package com.uansari.moviewise.ui.home
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,30 +13,36 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.uansari.moviewise.domain.model.Movie
+import com.uansari.moviewise.ui.components.EmptyScreen
+import com.uansari.moviewise.ui.components.ErrorScreen
+import com.uansari.moviewise.ui.components.LoadingScreen
 import com.uansari.moviewise.ui.components.MovieCard
+import com.uansari.moviewise.ui.components.MovieSectionShimmer
 
 @Composable
 fun HomeScreen(
     onNavigateToDetail: (Int) -> Unit, viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     // One-time Effects
     LaunchedEffect(Unit) {
@@ -48,117 +53,148 @@ fun HomeScreen(
                 }
 
                 is HomeContract.Effect.ShowError -> {
-                    Log.e("HOMESCREEN", effect.message)
+                    snackbarHostState.showSnackbar(effect.message)
                 }
             }
         }
     }
 
     HomeContent(
-        state = state, onEvent = viewModel::onEvent
+        state = state, snackbarHostState = snackbarHostState, onEvent = viewModel::onEvent
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeContent(
-    state: HomeContract.State, onEvent: (HomeContract.Event) -> Unit
+    state: HomeContract.State,
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    onEvent: (HomeContract.Event) -> Unit,
 ) {
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = "MovieWise", fontWeight = FontWeight.Bold
-                    )
-                }, colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
+    Scaffold(topBar = {
+        CenterAlignedTopAppBar(
+            title = {
+                Text(
+                    text = "MovieWise", fontWeight = FontWeight.Bold
                 )
+            }, colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.background
             )
-        }) { paddingValues ->
+        )
+    }, snackbarHost = { SnackbarHost(snackbarHostState) }) { paddingValues ->
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-
+        Box(modifier = Modifier.padding(paddingValues)) {
             when {
 
-                // Loading State
-                state.isLoading && state.popular.isEmpty() -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
+                // First launch, no cache, loading
+                state.isLoading && !state.hasData -> {
+                    LoadingScreen()
+                }
+
+                // API failed, no cache to show
+                state.error != null && !state.hasData -> {
+                    ErrorScreen(
+                        message = state.error, onRetry = { onEvent(HomeContract.Event.Refresh) })
+                }
+
+                // Loaded successfully but empty (rare)
+                state.isEmpty -> {
+                    EmptyScreen(
+                        title = "No movies available", subtitle = "Pull down to refresh"
                     )
                 }
 
-                // Error State
-                state.error != null && state.popular.isEmpty() -> {
-                    ErrorContent(
-                        message = state.error,
-                        onRetry = { onEvent(HomeContract.Event.Refresh) },
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
-
-                // Success State
+                // Has data — show lists with pull-to-refresh
                 else -> {
-                    MovieListContent(
-                        state = state, onMovieClick = { movieId ->
-                            onEvent(HomeContract.Event.MovieClicked(movieId))
-                        })
+                    /**
+                     * PullToRefreshBox wraps the scrollable content.
+                     *
+                     * isRefreshing drives the visual indicator at the top.
+                     * onRefresh sends a Refresh Event to the ViewModel.
+                     *
+                     * The movie lists stay fully visible while isRefreshing = true.
+                     * The indicator appears above them, not replacing them.
+                     *
+                     * This is the key UX difference from isLoading:
+                     * isLoading  → replace content with spinner/shimmer
+                     * isRefreshing → overlay indicator on top of content
+                     */
+                    PullToRefreshBox(
+                        isRefreshing = state.isRefreshing,
+                        onRefresh = { onEvent(HomeContract.Event.Refresh) },
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        MovieListContent(
+                            state = state, onMovieClick = { movieId ->
+                                onEvent(HomeContract.Event.MovieClicked(movieId))
+                            })
+                    }
                 }
             }
         }
     }
 }
 
+
 @Composable
 private fun MovieListContent(
-    state: HomeContract.State, onMovieClick: (Int) -> Unit
+    state: HomeContract.State, onMovieClick: (Int) -> Unit, modifier: Modifier = Modifier
 ) {
     LazyColumn(
-        modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 16.dp)
+        modifier = modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)
     ) {
-        if (state.nowPlaying.isNotEmpty()) {
-            item {
-                MovieSection(
-                    title = "Now Playing", movies = state.nowPlaying, onMovieClick = onMovieClick
-                )
-            }
+        item {
+            MovieSection(
+                title = "Now Playing",
+                movies = state.nowPlaying,
+                isLoading = state.isLoading && state.nowPlaying.isEmpty(),
+                onMovieClick = onMovieClick
+            )
         }
 
-        if (state.popular.isNotEmpty()) {
-            item {
-                MovieSection(
-                    title = "Popular", movies = state.popular, onMovieClick = onMovieClick
-                )
-            }
+        item {
+            MovieSection(
+                title = "Popular",
+                movies = state.popular,
+                isLoading = state.isLoading && state.popular.isEmpty(),
+                onMovieClick = onMovieClick
+            )
         }
 
-        if (state.topRated.isNotEmpty()) {
-            item {
-                MovieSection(
-                    title = "Top Rated", movies = state.topRated, onMovieClick = onMovieClick
-                )
-            }
+        item {
+            MovieSection(
+                title = "Top Rated",
+                movies = state.topRated,
+                isLoading = state.isLoading && state.topRated.isEmpty(),
+                onMovieClick = onMovieClick
+            )
         }
 
-        if (state.upcoming.isNotEmpty()) {
-            item {
-                MovieSection(
-                    title = "Upcoming", movies = state.upcoming, onMovieClick = onMovieClick
-                )
-            }
+        item {
+            MovieSection(
+                title = "Upcoming",
+                movies = state.upcoming,
+                isLoading = state.isLoading && state.upcoming.isEmpty(),
+                onMovieClick = onMovieClick
+            )
         }
     }
 }
 
 @Composable
 private fun MovieSection(
-    title: String, movies: List<Movie>, onMovieClick: (Int) -> Unit
+    title: String,
+    movies: List<Movie>,
+    isLoading: Boolean,
+    onMovieClick: (Int) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+
+    if (movies.isEmpty() && !isLoading) return
+
+    Column(
+        modifier = modifier.fillMaxWidth()
+    ) {
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
@@ -168,42 +204,23 @@ private fun MovieSection(
             )
         )
 
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(items = movies, key = { it.id }) { movie ->
-                MovieCard(
-                    movie = movie, onClick = onMovieClick
-                )
+        if (isLoading) {
+            // Show shimmer placeholders while this section loads
+            MovieSectionShimmer()
+        } else {
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(
+                    items = movies, key = { it.id }) { movie ->
+                    MovieCard(
+                        movie = movie, onClick = onMovieClick
+                    )
+                }
             }
         }
 
         Spacer(modifier = Modifier.height(4.dp))
-    }
-}
-
-@Composable
-private fun ErrorContent(
-    message: String, onRetry: () -> Unit, modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = "Something went wrong",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = message,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        TextButton(onClick = onRetry) {
-            Text("Retry")
-        }
     }
 }

@@ -1,8 +1,10 @@
 package com.uansari.moviewise.ui.components
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
@@ -17,7 +19,8 @@ import androidx.compose.ui.unit.sp
 import com.uansari.moviewise.ui.theme.RatingStarColor
 
 /**
- * Star rating badge — reused in MovieCard and DetailScreen.
+ * Star rating badge
+ * Reused in MovieCard and DetailScreen.
  */
 @Composable
 fun RatingBadge(
@@ -25,17 +28,16 @@ fun RatingBadge(
 ) {
     val formattedRating = String.format("%.1f", rating)
 
-    androidx.compose.foundation.layout.Row(
+    Row(
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start,
         modifier = modifier.padding(horizontal = 2.dp)
     ) {
         Icon(
             imageVector = Icons.Default.Star,
             contentDescription = null,
             tint = RatingStarColor,
-            modifier = Modifier
-                .height(12.dp)
-                .width(12.dp)
+            modifier = Modifier.size(12.dp)
         )
         Spacer(modifier = Modifier.width(2.dp))
         Text(
