@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.uansari.moviewise.ui.detail.DetailScreen
 import com.uansari.moviewise.ui.home.HomeScreen
 
 /**
@@ -35,7 +36,9 @@ fun MovieNavGraph(
                 navArgument("movieId") { type = NavType.IntType }
             )
         ) {
-
+            DetailScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
     }
 }
