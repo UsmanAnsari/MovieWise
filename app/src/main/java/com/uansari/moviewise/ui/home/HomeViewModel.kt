@@ -8,6 +8,7 @@ import com.uansari.moviewise.domain.usecase.GetPopularMoviesUseCase
 import com.uansari.moviewise.domain.usecase.GetTopRatedMoviesUseCase
 import com.uansari.moviewise.domain.usecase.GetUpcomingMoviesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import javax.inject.Inject
 
 @HiltViewModel
@@ -38,8 +40,14 @@ class HomeViewModel @Inject constructor(
     private val _effect = Channel<HomeContract.Effect>(Channel.BUFFERED)
     val effect = _effect.receiveAsFlow()
 
-    // Init
+    /**
+     * Tracks the coroutine running all 4 category loads.
+     * Cancelling moviesJob stops all 4 child coroutines simultaneously —
+     * essential so a refresh doesn't run alongside the previous load.
+     */
+    private var moviesJob: Job? = null
 
+    // Init
     init {
         loadMovies()
     }
@@ -62,81 +70,154 @@ class HomeViewModel @Inject constructor(
     // Data Loading
 
     private fun loadMovies() {
-        loadPopular()
-        loadNowPlaying()
-        loadTopRated()
-        loadUpcoming()
+        moviesJob?.cancel()
+
+        // Clear error so a stale error message doesn't show
+        // alongside newly loading content
+        _state.update { it.copy(error = null) }
+
+        moviesJob = viewModelScope.launch {
+            // supervisorScope ensures one failing category doesn't
+            // cancel the other three — each loads independently
+            supervisorScope {
+                launch { collectPopular() }
+                launch { collectNowPlaying() }
+                launch { collectTopRated() }
+                launch { collectUpcoming() }
+            }
+        }
     }
 
-    /**
-     * Each category loads independently in its own coroutine.
-     *
-     * WHY SEPARATE COROUTINES:
-     * If all 4 calls were sequential, a slow "upcoming" response
-     * would block "popular" from showing. With separate launches,
-     * each list appears as soon as its own response arrives —
-     * the screen progressively fills in.
-     */
-    private fun loadPopular() {
-        viewModelScope.launch {
-            getPopularMovies().collect { resource ->
-                when (resource) {
-                    is Resource.Loading -> _state.update {
-                        it.copy(isLoading = true, error = null)
+
+    private suspend fun collectPopular() {
+        getPopularMovies().collect { resource ->
+            when (resource) {
+                is Resource.Loading -> {
+                    val hasCachedData = resource.data?.isNotEmpty() == true
+                    _state.update { state ->
+                        state.copy(
+                            isLoading = !hasCachedData, isRefreshing = hasCachedData,
+                            // Show cached data immediately if we have it
+                            popular = resource.data?.takeIf { it.isNotEmpty() } ?: state.popular)
                     }
-                    is Resource.Success -> _state.update {
-                        it.copy(isLoading = false, popular = resource.data)
+                }
+
+                is Resource.Success -> _state.update {
+                    it.copy(
+                        isLoading = false, isRefreshing = false, popular = resource.data
+                    )
+                }
+
+                is Resource.Error -> {
+                    _state.update { state ->
+                        state.copy(
+                            isLoading = false, isRefreshing = false,
+                            // Keep showing cached data if available
+                            popular = resource.data?.takeIf { it.isNotEmpty() } ?: state.popular,
+                            // Only set error field if we have no data to show
+                            error = if (resource.data.isNullOrEmpty()) resource.message
+                            else state.error)
                     }
-                    is Resource.Error -> _state.update {
-                        it.copy(isLoading = false, error = resource.message)
+                    // If we had cached data, show Snackbar instead of error screen
+                    if (!resource.data.isNullOrEmpty()) {
+                        _effect.send(
+                            HomeContract.Effect.ShowError("Showing cached data — ${resource.message}")
+                        )
                     }
                 }
             }
         }
     }
 
-    private fun loadNowPlaying() {
-        viewModelScope.launch {
-            getNowPlayingMovies().collect { resource ->
-                when (resource) {
-                    is Resource.Loading -> _state.update { it.copy(isLoading = true) }
-                    is Resource.Success -> _state.update {
-                        it.copy(isLoading = false, nowPlaying = resource.data)
+    private suspend fun collectNowPlaying() {
+        getNowPlayingMovies().collect { resource ->
+            when (resource) {
+                is Resource.Loading -> {
+                    val hasCachedData = resource.data?.isNotEmpty() == true
+                    _state.update { state ->
+                        state.copy(
+                            isLoading = if (hasCachedData) state.isLoading else true,
+                            isRefreshing = if (hasCachedData) true else state.isRefreshing,
+                            nowPlaying = resource.data?.takeIf { it.isNotEmpty() }
+                                ?: state.nowPlaying)
                     }
-                    is Resource.Error -> _state.update {
-                        it.copy(isLoading = false, error = resource.message)
+                }
+
+                is Resource.Success -> _state.update {
+                    it.copy(
+                        isLoading = false, isRefreshing = false, nowPlaying = resource.data
+                    )
+                }
+
+                is Resource.Error -> {
+                    _state.update { state ->
+                        state.copy(
+                            isLoading = false,
+                            isRefreshing = false,
+                            nowPlaying = resource.data?.takeIf { it.isNotEmpty() }
+                                ?: state.nowPlaying)
                     }
                 }
             }
         }
     }
 
-    private fun loadTopRated() {
-        viewModelScope.launch {
-            getTopRatedMovies().collect { resource ->
-                when (resource) {
-                    is Resource.Loading -> _state.update { it.copy(isLoading = true) }
-                    is Resource.Success -> _state.update {
-                        it.copy(isLoading = false, topRated = resource.data)
+    private suspend fun collectTopRated() {
+        getTopRatedMovies().collect { resource ->
+            when (resource) {
+                is Resource.Loading -> {
+                    val hasCachedData = resource.data?.isNotEmpty() == true
+                    _state.update { state ->
+                        state.copy(
+                            isLoading = if (hasCachedData) state.isLoading else true,
+                            isRefreshing = if (hasCachedData) true else state.isRefreshing,
+                            topRated = resource.data?.takeIf { it.isNotEmpty() } ?: state.topRated)
                     }
-                    is Resource.Error -> _state.update {
-                        it.copy(isLoading = false, error = resource.message)
+                }
+
+                is Resource.Success -> _state.update {
+                    it.copy(
+                        isLoading = false, isRefreshing = false, topRated = resource.data
+                    )
+                }
+
+                is Resource.Error -> {
+                    _state.update { state ->
+                        state.copy(
+                            isLoading = false,
+                            isRefreshing = false,
+                            topRated = resource.data?.takeIf { it.isNotEmpty() } ?: state.topRated)
                     }
                 }
             }
         }
     }
 
-    private fun loadUpcoming() {
-        viewModelScope.launch {
-            getUpcomingMovies().collect { resource ->
-                when (resource) {
-                    is Resource.Loading -> _state.update { it.copy(isLoading = true) }
-                    is Resource.Success -> _state.update {
-                        it.copy(isLoading = false, upcoming = resource.data)
+    private suspend fun collectUpcoming() {
+        getUpcomingMovies().collect { resource ->
+            when (resource) {
+                is Resource.Loading -> {
+                    val hasCachedData = resource.data?.isNotEmpty() == true
+                    _state.update { state ->
+                        state.copy(
+                            isLoading = if (hasCachedData) state.isLoading else true,
+                            isRefreshing = if (hasCachedData) true else state.isRefreshing,
+                            upcoming = resource.data?.takeIf { it.isNotEmpty() } ?: state.upcoming)
                     }
-                    is Resource.Error -> _state.update {
-                        it.copy(isLoading = false, error = resource.message)
+                }
+
+                is Resource.Success -> _state.update {
+                    it.copy(
+                        isLoading = false, isRefreshing = false, upcoming = resource.data
+                    )
+                }
+
+                is Resource.Error -> {
+                    _state.update { state ->
+                        state.copy(
+                            isLoading = false,
+                            isRefreshing = false,
+                            upcoming = resource.data?.takeIf { it.isNotEmpty() } ?: state.upcoming)
                     }
                 }
             }

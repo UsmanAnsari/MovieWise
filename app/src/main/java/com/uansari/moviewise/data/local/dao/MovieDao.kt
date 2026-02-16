@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.uansari.moviewise.data.local.entity.MovieEntity
+import com.uansari.moviewise.domain.util.MovieCategory
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -14,7 +15,7 @@ interface MovieDao {
      * Returns cached movies for a given category as a Flow.
      */
     @Query("SELECT * FROM movies WHERE category = :category ORDER BY vote_average DESC")
-    fun getMoviesByCategory(category: String): Flow<List<MovieEntity>>
+    fun getMoviesByCategory(category: MovieCategory): Flow<List<MovieEntity>>
 
     /**
      * Inserts or replaces movies.
@@ -29,7 +30,7 @@ interface MovieDao {
      * Called before insertMovies() during a refresh to avoid stale entries.
      */
     @Query("DELETE FROM movies WHERE category = :category")
-    suspend fun deleteMoviesByCategory(category: String)
+    suspend fun deleteMoviesByCategory(category: MovieCategory)
 
     /**
      * Returns a single cached movie by ID — used to check if

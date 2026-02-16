@@ -22,6 +22,7 @@ object HomeContract {
 
     data class State(
         val isLoading: Boolean = false,
+        val isRefreshing: Boolean = false,
         val nowPlaying: List<Movie> = emptyList(),
         val popular: List<Movie> = emptyList(),
         val topRated: List<Movie> = emptyList(),
@@ -34,11 +35,18 @@ object HomeContract {
          */
         val isEmpty: Boolean
             get() = !isLoading &&
+                    !isRefreshing &&
                     error == null &&
                     nowPlaying.isEmpty() &&
                     popular.isEmpty() &&
                     topRated.isEmpty() &&
                     upcoming.isEmpty()
+
+        val hasData: Boolean
+            get() = nowPlaying.isNotEmpty() ||
+                    popular.isNotEmpty() ||
+                    topRated.isNotEmpty() ||
+                    upcoming.isNotEmpty()
     }
 
     sealed interface Event {
