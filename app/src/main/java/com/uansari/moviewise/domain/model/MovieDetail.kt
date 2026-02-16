@@ -24,8 +24,22 @@ data class MovieDetail(
  * profilePath is a full URL ready for Coil — built by the mapper.
  */
 data class CastMember(
-    val id: Int,
-    val name: String,
-    val character: String,
-    val profilePath: String?
+    val id: Int, val name: String, val character: String, val profilePath: String?
+)
+
+
+/**
+ * Converts `MovieDetail` to `Movie` for watchlist storage.
+ * `MovieDetail` has too many fields for the watchlist
+ * `Movie` is the lightweight version the watchlist screen actually needs.
+ */
+fun MovieDetail.toMovie(): Movie = Movie(
+    id = id,
+    title = title,
+    overview = overview,
+    posterPath = posterPath,
+    backdropPath = backdropPath,
+    voteAverage = voteAverage,
+    releaseDate = releaseDate,
+    category = null
 )

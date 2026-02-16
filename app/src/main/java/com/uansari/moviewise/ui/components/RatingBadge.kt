@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.uansari.moviewise.domain.util.formatToRatingString
 import com.uansari.moviewise.ui.theme.RatingStarColor
 
 /**
@@ -26,8 +27,6 @@ import com.uansari.moviewise.ui.theme.RatingStarColor
 fun RatingBadge(
     rating: Double, modifier: Modifier = Modifier
 ) {
-    val formattedRating = String.format("%.1f", rating)
-
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start,
@@ -41,7 +40,7 @@ fun RatingBadge(
         )
         Spacer(modifier = Modifier.width(2.dp))
         Text(
-            text = formattedRating,
+            text = rating.formatToRatingString(),
             fontSize = 11.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
