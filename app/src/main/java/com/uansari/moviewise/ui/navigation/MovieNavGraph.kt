@@ -9,6 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.uansari.moviewise.ui.detail.DetailScreen
 import com.uansari.moviewise.ui.home.HomeScreen
+import com.uansari.moviewise.ui.watchlist.WatchlistScreen
 
 /**
  * Central navigation graph.
@@ -18,7 +19,7 @@ fun MovieNavGraph(
     navController: NavHostController = rememberNavController()
 ) {
     NavHost(
-        navController = navController, startDestination = Routes.HOME
+        navController = navController, startDestination = Routes.WATCHLIST
     ) {
 
         // Home
@@ -31,14 +32,20 @@ fun MovieNavGraph(
 
         // Detail
         composable(
-            route = Routes.DETAIL,
-            arguments = listOf(
-                navArgument("movieId") { type = NavType.IntType }
-            )
+            route = Routes.DETAIL, arguments = listOf(
+                navArgument("movieId") { type = NavType.IntType })
         ) {
             DetailScreen(
-                onNavigateBack = { navController.popBackStack() }
-            )
+                onNavigateBack = { navController.popBackStack() })
         }
+
+        // Watchlist
+        composable(route = Routes.WATCHLIST) {
+            WatchlistScreen(
+                onNavigateToDetail = { movieId ->
+                    navController.navigate(Routes.detail(movieId))
+                })
+        }
+
     }
 }
