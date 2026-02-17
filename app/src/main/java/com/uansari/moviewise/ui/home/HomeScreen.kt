@@ -83,7 +83,7 @@ fun HomeContent(
         )
     }, snackbarHost = { SnackbarHost(snackbarHostState) }) { paddingValues ->
 
-        Box(modifier = Modifier.padding(paddingValues)) {
+        Box(modifier = Modifier.padding(top = paddingValues.calculateTopPadding())) {
             when {
 
                 // First launch, no cache, loading

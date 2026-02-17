@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.uansari.moviewise.ui.navigation.MovieNavGraph
+import com.uansari.moviewise.ui.navigation.MainScaffold
 import com.uansari.moviewise.ui.theme.MovieWiseTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MovieWiseTheme {
-                MovieNavGraph()
+                MainScaffold()
             }
         }
     }

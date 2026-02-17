@@ -9,6 +9,7 @@ import com.uansari.moviewise.data.mappers.toDomain
 import com.uansari.moviewise.data.mappers.toEntity
 import com.uansari.moviewise.data.mappers.toWatchlistEntity
 import com.uansari.moviewise.data.remote.api.TmdbApiService
+import com.uansari.moviewise.data.remote.paging.SearchPagingSource
 import com.uansari.moviewise.data.util.networkBoundResource
 import com.uansari.moviewise.domain.Resource
 import com.uansari.moviewise.domain.model.Movie
@@ -104,9 +105,10 @@ class MovieRepositoryImpl @Inject constructor(
     override fun searchMovies(query: String): Flow<PagingData<Movie>> {
         return Pager(
             config = PagingConfig(
-                pageSize = 20, enablePlaceholders = false
+                pageSize = 20,              // TMDB returns 20 per page by default
+                enablePlaceholders = false, initialLoadSize = 20
             ), pagingSourceFactory = {
-                SearchPagingSourcePlaceholder(apiService, query)
+                SearchPagingSource(apiService, query)
             }).flow
     }
 

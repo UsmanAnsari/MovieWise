@@ -94,7 +94,7 @@ fun DetailContent(
         }
     }) { paddingValues ->
 
-        Box(modifier = Modifier.padding(paddingValues)) {
+        Box(modifier = Modifier.padding(top = paddingValues.calculateTopPadding())) {
             when {
                 state.isLoading -> LoadingScreen()
 
