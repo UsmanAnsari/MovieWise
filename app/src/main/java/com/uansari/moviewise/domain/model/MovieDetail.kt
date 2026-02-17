@@ -41,5 +41,4 @@ fun MovieDetail.toMovie(): Movie = Movie(
     backdropPath = backdropPath,
     voteAverage = voteAverage,
     releaseDate = releaseDate,
-    category = null
 )

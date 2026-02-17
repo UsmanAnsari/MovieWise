@@ -37,8 +37,7 @@ class MovieRepositoryImpl @Inject constructor(
 
     // Home Screen
     override fun getPopularMovies(): Flow<Resource<List<Movie>>> = networkBoundResource(query = {
-        movieDao.getMoviesByCategory(MovieCategory.POPULAR)
-            .map { entities -> entities.map { it.toDomain() } }
+        movieDao.getMoviesByCategoryPopular().map { entities -> entities.map { it.toDomain() } }
     }, fetch = {
         apiService.getPopularMovies()
     }, saveFetchResult = { response ->
@@ -46,41 +45,38 @@ class MovieRepositoryImpl @Inject constructor(
         // Done as two separate operations (not a transaction) because
         // the brief gap is acceptable — the Room Flow will emit the
         // empty state for a split second before re-emitting with fresh data.
-        movieDao.deleteMoviesByCategory(MovieCategory.POPULAR)
-        movieDao.insertMovies(
+        movieDao.deleteMoviesByCategoryPopular()
+        movieDao.upsertMovies(
             response.results.map { it.toEntity(MovieCategory.POPULAR) })
     })
 
     override fun getNowPlayingMovies(): Flow<Resource<List<Movie>>> = networkBoundResource(query = {
-        movieDao.getMoviesByCategory(MovieCategory.NOW_PLAYING)
-            .map { entities -> entities.map { it.toDomain() } }
+        movieDao.getMoviesByCategoryNowPlaying().map { entities -> entities.map { it.toDomain() } }
     }, fetch = {
         apiService.getNowPlayingMovies()
     }, saveFetchResult = { response ->
-        movieDao.deleteMoviesByCategory(MovieCategory.NOW_PLAYING)
-        movieDao.insertMovies(
+        movieDao.deleteMoviesByCategoryNowPlaying()
+        movieDao.upsertMovies(
             response.results.map { it.toEntity(MovieCategory.NOW_PLAYING) })
     })
 
     override fun getTopRatedMovies(): Flow<Resource<List<Movie>>> = networkBoundResource(query = {
-        movieDao.getMoviesByCategory(MovieCategory.TOP_RATED)
-            .map { entities -> entities.map { it.toDomain() } }
+        movieDao.getMoviesByCategoryTopRated().map { entities -> entities.map { it.toDomain() } }
     }, fetch = {
         apiService.getTopRatedMovies()
     }, saveFetchResult = { response ->
-        movieDao.deleteMoviesByCategory(MovieCategory.TOP_RATED)
-        movieDao.insertMovies(
+        movieDao.deleteMoviesByCategoryTopRated()
+        movieDao.upsertMovies(
             response.results.map { it.toEntity(MovieCategory.TOP_RATED) })
     })
 
     override fun getUpcomingMovies(): Flow<Resource<List<Movie>>> = networkBoundResource(query = {
-        movieDao.getMoviesByCategory(MovieCategory.UPCOMING)
-            .map { entities -> entities.map { it.toDomain() } }
+        movieDao.getMoviesByCategoryUpcoming().map { entities -> entities.map { it.toDomain() } }
     }, fetch = {
         apiService.getUpcomingMovies()
     }, saveFetchResult = { response ->
-        movieDao.deleteMoviesByCategory(MovieCategory.UPCOMING)
-        movieDao.insertMovies(
+        movieDao.deleteMoviesByCategoryUpcoming()
+        movieDao.upsertMovies(
             response.results.map { it.toEntity(MovieCategory.UPCOMING) })
     })
 

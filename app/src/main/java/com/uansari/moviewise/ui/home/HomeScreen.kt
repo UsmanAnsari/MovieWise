@@ -145,6 +145,14 @@ private fun MovieListContent(
     ) {
         item {
             MovieSection(
+                title = "Upcoming",
+                movies = state.upcoming,
+                isLoading = state.isLoading && state.upcoming.isEmpty(),
+                onMovieClick = onMovieClick
+            )
+        }
+        item {
+            MovieSection(
                 title = "Now Playing",
                 movies = state.nowPlaying,
                 isLoading = state.isLoading && state.nowPlaying.isEmpty(),
@@ -170,14 +178,6 @@ private fun MovieListContent(
             )
         }
 
-        item {
-            MovieSection(
-                title = "Upcoming",
-                movies = state.upcoming,
-                isLoading = state.isLoading && state.upcoming.isEmpty(),
-                onMovieClick = onMovieClick
-            )
-        }
     }
 }
 

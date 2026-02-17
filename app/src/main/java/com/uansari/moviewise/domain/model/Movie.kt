@@ -1,7 +1,5 @@
 package com.uansari.moviewise.domain.model
 
-import com.uansari.moviewise.domain.util.MovieCategory
-
 /**
  * This is what ViewModels, UseCases, and the UI all work with.
  * No @Serializable. No @Entity. No framework annotations of any kind.
@@ -17,5 +15,8 @@ data class Movie(
     val backdropPath: String?,
     val voteAverage: Double,
     val releaseDate: String,
-    val category: MovieCategory? // Could be null in case for WatchList - Category is only useful for HomeScreen
+    val isPopular: Boolean = false,
+    val isNowPlaying: Boolean = false,
+    val isTopRated: Boolean = false,
+    val isUpcoming: Boolean = false,
 )
