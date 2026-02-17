@@ -101,7 +101,7 @@ fun WatchlistContent(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(top = paddingValues.calculateTopPadding())
         ) {
             when {
 
