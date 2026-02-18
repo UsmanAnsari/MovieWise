@@ -161,7 +161,7 @@ private fun MovieDetailContent(
                         CastMemberCard(castMember = castMember)
                     }
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(22.dp))
             }
         }
     }
@@ -295,7 +295,7 @@ private fun MovieHeader(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 48.dp, start = 16.dp, end = 16.dp)
+            .padding(top = 32.dp, start = 16.dp, end = 16.dp)
     ) {
         // Tagline
         if (movie.tagline.isNotBlank()) {
@@ -322,6 +322,8 @@ private fun MovieHeader(
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
+        } else {
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }

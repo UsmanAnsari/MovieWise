@@ -11,6 +11,7 @@ import com.uansari.moviewise.data.mappers.toWatchlistEntity
 import com.uansari.moviewise.data.remote.api.TmdbApiService
 import com.uansari.moviewise.data.remote.paging.SearchPagingSource
 import com.uansari.moviewise.data.util.networkBoundResource
+import com.uansari.moviewise.data.util.toUserFriendlyMessage
 import com.uansari.moviewise.domain.Resource
 import com.uansari.moviewise.domain.model.Movie
 import com.uansari.moviewise.domain.model.MovieDetail
@@ -90,7 +91,7 @@ class MovieRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             emit(
                 Resource.Error(
-                    message = e.message ?: "Failed to load movie details"
+                    message = e.toUserFriendlyMessage()
                 )
             )
         }

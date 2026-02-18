@@ -4,9 +4,8 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.uansari.moviewise.data.mappers.toDomain
 import com.uansari.moviewise.data.remote.api.TmdbApiService
+import com.uansari.moviewise.data.util.toUserFriendlyMessage
 import com.uansari.moviewise.domain.model.Movie
-import okio.IOException
-import retrofit2.HttpException
 
 class SearchPagingSource(
     private val apiService: TmdbApiService, private val query: String
@@ -33,17 +32,9 @@ class SearchPagingSource(
                 nextKey = if (page < response.totalPages) page + 1 else null
             )
 
-        } catch (exception: IOException) {
-            // Network failure — no internet, timeout, etc.
-            LoadResult.Error(exception)
-
-        } catch (exception: HttpException) {
-            // HTTP error — 404, 500, etc.
-            LoadResult.Error(exception)
-
         } catch (exception: Exception) {
             // Any other error
-            LoadResult.Error(exception)
+            LoadResult.Error(Exception(exception.toUserFriendlyMessage()))
         }
     }
 
