@@ -1,5 +1,6 @@
 package com.uansari.moviewise.ui.search
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,9 +10,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.SearchOff
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -20,7 +24,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -68,7 +71,7 @@ fun SearchContent(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
                     Text(text = "Search", fontWeight = FontWeight.Bold)
                 }, colors = TopAppBarDefaults.topAppBarColors(
@@ -84,24 +87,40 @@ fun SearchContent(
         ) {
 
             OutlinedTextField(
+                shape = RoundedCornerShape(12.dp),
                 value = query,
                 onValueChange = { newQuery ->
                     onEvent(SearchContract.Event.QueryChanged(newQuery))
                 },
                 placeholder = { Text("Search for movies...") },
                 leadingIcon = {
-                    Icon(imageVector = Icons.Default.Search, contentDescription = null)
+                    Icon(imageVector = Icons.Default.Search, contentDescription = "search")
+                },
+                trailingIcon = {
+                    if (query.isNotEmpty()) Icon(
+                        imageVector = Icons.Default.Clear,
+                        contentDescription = "clear",
+                        modifier = Modifier.clickable {
+                            onEvent(
+                                SearchContract.Event.QueryChanged("")
+                            )
+                        })
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 4.dp),
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
                 singleLine = true
             )
 
             when (val refreshState = searchResults.loadState.refresh) {
 
                 is LoadState.Loading -> {
-                    if (query.isNotBlank()) {
+                    if (query.trim().length < 2) {
+                        EmptyScreen(
+                            title = "Search for movies",
+                            subtitle = "Enter at least 2 characters to search"
+                        )
+                    } else {
                         LoadingScreen()
                     }
                 }
@@ -114,16 +133,10 @@ fun SearchContent(
 
                 is LoadState.NotLoading -> {
                     when {
-                        query.isBlank() -> {
+                        query.trim().length < 2 -> {
                             EmptyScreen(
                                 title = "Search for movies",
-                                subtitle = "Type at least 2 characters to search"
-                            )
-                        }
-
-                        query.length < 2 -> {
-                            EmptyScreen(
-                                title = "Keep typing...", subtitle = "Enter at least 2 characters"
+                                subtitle = "Enter at least 2 characters to search"
                             )
                         }
 

@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -26,7 +27,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -77,16 +77,16 @@ fun WatchlistContent(
     onEvent: (WatchlistContract.Event) -> Unit
 ) {
     Scaffold(topBar = {
-        TopAppBar(
+        CenterAlignedTopAppBar(
             title = {
-                Column {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = "Watchlist", fontWeight = FontWeight.Bold
                     )
                     // Movie count subtitle — only shown when list is non-empty
                     if (state.movies.isNotEmpty()) {
                         Text(
-                            text = "${state.movies.size} " + if (state.movies.size == 1) "movie" else "movies",
+                            text = "${state.movies.size} " + if (state.movies.size == 1) "Movie" else "Movies",
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -116,7 +116,7 @@ fun WatchlistContent(
                 state.isEmpty -> {
                     EmptyScreen(
                         title = "Your watchlist is empty",
-                        subtitle = "Save movies from the detail screen\nto watch them later"
+                        subtitle = "Save movies from the detail screen"
                     )
                 }
 
