@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material.icons.outlined.MovieFilter
+import androidx.compose.material.icons.outlined.Subscriptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -49,7 +51,7 @@ fun EmptyScreen(
     title: String,
     subtitle: String,
     modifier: Modifier = Modifier,
-    icon: ImageVector = Icons.Outlined.MovieFilter
+    icon: ImageVector = Icons.Outlined.Subscriptions
 ) {
     Column(
         modifier = modifier

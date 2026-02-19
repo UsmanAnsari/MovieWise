@@ -74,13 +74,6 @@ jobs:
       - name: Run unit tests
         run: ./gradlew test --stacktrace
 
-      - name: Publish unit test results
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        if: always()
-        with:
-          files: |
-            app/build/test-results/**/*.xml
-
       # Step 9: Run Android lint
       - name: Run lint
         run: ./gradlew lintDebug --stacktrace
