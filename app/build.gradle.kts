@@ -28,7 +28,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "com.uansari.moviewise.utils.HiltTestRunner"
 
         buildConfigField(
             "String", "TMDB_API_KEY", "\"${localProperties.getProperty("TMDB_API_KEY", "")}\""
