@@ -87,10 +87,16 @@ jobs:
         id: branch_name
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            echo "branch=${GITHUB_HEAD_REF}" >> $GITHUB_OUTPUT
+            BRANCH="${GITHUB_HEAD_REF}"
           else
-            echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
+            BRANCH="${GITHUB_REF#refs/heads/}"
           fi
+          
+          # Sanitize branch name: replace / with - and remove other invalid chars
+          SAFE_BRANCH=$(echo "$BRANCH" | sed 's/\//-/g' | sed 's/[^a-zA-Z0-9._-]/-/g')
+          echo "branch=$SAFE_BRANCH" >> $GITHUB_OUTPUT
+          echo "Original branch: $BRANCH"
+          echo "Sanitized branch: $SAFE_BRANCH"
 
       # Step 12: Upload release APK (main branch only)
       - name: Upload release APK (main)
