@@ -57,19 +57,6 @@ object TestData {
         genres = genres,
         cast = cast
     )
-
-    fun createCastMember(
-        id: Int = 1,
-        name: String = "Test Actor",
-        character: String = "Test Character",
-        profilePath: String? = "/actor.jpg"
-    ) = CastMember(
-        id = id,
-        name = name,
-        character = character,
-        profilePath = profilePath
-    )
-
     val sampleMovies = listOf(
         createMovie(id = 1, title = "Movie 1"),
         createMovie(id = 2, title = "Movie 2"),
