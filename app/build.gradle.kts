@@ -41,13 +41,34 @@ android {
         )
 
     }
+    signingConfigs {
+        create("release") {
+            // Read from environment variables (for CI) or local.properties (for local builds)
+            storeFile = file(
+                System.getenv("KEYSTORE_FILE") ?: project.findProperty("KEYSTORE_FILE")
+                ?: "release-keystore.jks"
+            )
+            storePassword = System.getenv("KEYSTORE_PASSWORD")
+                ?: project.findProperty("KEYSTORE_PASSWORD") as String?
+            keyAlias = System.getenv("KEY_ALIAS") ?: project.findProperty("KEY_ALIAS") as String?
+                    ?: "moviewise"
+            keyPassword =
+                System.getenv("KEY_PASSWORD") ?: project.findProperty("KEY_PASSWORD") as String?
+        }
+    }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
+        }
+        debug {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
         }
     }
     compileOptions {
