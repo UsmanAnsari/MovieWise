@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -100,7 +102,7 @@ fun HomeContent(
                 // Loaded successfully but empty (rare)
                 state.isEmpty -> {
                     EmptyScreen(
-                        title = "No movies available", subtitle = "Pull down to refresh"
+                        title = "No movies available", subtitle = "Pull down to refresh", icon = Icons.Outlined.CloudOff
                     )
                 }
 

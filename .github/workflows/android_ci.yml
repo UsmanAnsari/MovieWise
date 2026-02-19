@@ -47,13 +47,13 @@ jobs:
       #  Step 5: Decode keystore from base64
       - name: Decode keystore
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > release-keystore.jks
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > app/release-keystore.jks
 
       # Step 6: Create local.properties
       - name: Create local.properties
         run: |
           echo "TMDB_API_KEY=${{ secrets.TMDB_API_KEY }}" > local.properties
-          echo "KEYSTORE_FILE=release-keystore.jks" >> local.properties
+          echo "KEYSTORE_FILE=app/release-keystore.jks" >> local.properties
           echo "KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}" >> local.properties
           echo "KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> local.properties
           echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> local.properties
@@ -126,7 +126,6 @@ jobs:
           name: test-reports-${{ github.run_number }}
           path: |
             app/build/reports/tests/
-            app/build/test-results/
           retention-days: 30
 
       # Step 16: Upload lint reports

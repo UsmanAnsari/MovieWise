@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.LocalMovies
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -116,7 +117,8 @@ fun WatchlistContent(
                 state.isEmpty -> {
                     EmptyScreen(
                         title = "Your watchlist is empty",
-                        subtitle = "Save movies from the detail screen"
+                        subtitle = "Save movies from the detail screen",
+                        icon = Icons.Outlined.LocalMovies
                     )
                 }
 

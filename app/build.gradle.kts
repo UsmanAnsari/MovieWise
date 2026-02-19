@@ -45,8 +45,9 @@ android {
         create("release") {
             // Read from environment variables (for CI) or local.properties (for local builds)
             storeFile = file(
-                System.getenv("KEYSTORE_FILE") ?: project.findProperty("KEYSTORE_FILE")
-                ?: "release-keystore.jks"
+                System.getenv("KEYSTORE_FILE")
+                    ?: project.findProperty("KEYSTORE_FILE")
+                    ?: "release-keystore.jks"
             )
             storePassword = System.getenv("KEYSTORE_PASSWORD")
                 ?: project.findProperty("KEYSTORE_PASSWORD") as String?
