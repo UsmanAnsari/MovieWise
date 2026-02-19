@@ -4,8 +4,9 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
+import androidx.room.Update
 import com.uansari.moviewise.data.local.entity.MovieEntity
-import com.uansari.moviewise.domain.util.MovieCategory
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -14,23 +15,70 @@ interface MovieDao {
     /**
      * Returns cached movies for a given category as a Flow.
      */
-    @Query("SELECT * FROM movies WHERE category = :category ORDER BY vote_average DESC")
-    fun getMoviesByCategory(category: MovieCategory): Flow<List<MovieEntity>>
+    @Query("SELECT * FROM movies WHERE is_now_playing = 1 ORDER BY vote_average DESC")
+    fun getMoviesByCategoryNowPlaying(): Flow<List<MovieEntity>>
+
+    @Query("SELECT * FROM movies WHERE is_popular = 1 ORDER BY vote_average DESC")
+    fun getMoviesByCategoryPopular(): Flow<List<MovieEntity>>
+
+    @Query("SELECT * FROM movies WHERE is_top_rated = 1 ORDER BY vote_average DESC")
+    fun getMoviesByCategoryTopRated(): Flow<List<MovieEntity>>
+
+    @Query("SELECT * FROM movies WHERE is_upcoming = 1 ORDER BY vote_average DESC")
+    fun getMoviesByCategoryUpcoming(): Flow<List<MovieEntity>>
+
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertOnlyNew(movies: List<MovieEntity>): List<Long>
+
+    @Update
+    suspend fun updateExisting(movie: MovieEntity)
 
     /**
-     * Inserts or replaces movies.
-     * REPLACE strategy means if a movie already exists with the same ID,
-     * it gets overwritten with fresh data from the API.
+     * Inserts or update movies.
+     * Update strategy means if a movie already exists with the same ID in other `MovieCategory [Popular,Top_Rated etc.]`,
+     * it gets updated with the other category flag while retaining the previous one.
      */
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertMovies(movies: List<MovieEntity>)
+    @Transaction
+    suspend fun upsertMovies(movies: List<MovieEntity>) {
+        val insertResults = insertOnlyNew(movies)
+
+        for (i in insertResults.indices) {
+            // If result is -1, the movie already existed (conflict occurred)
+            if (insertResults[i] == -1L) {
+                val newMovie = movies[i]
+                val existingMovie = getMovieById(newMovie.id)
+
+                if (existingMovie != null) {
+                    // Retain 'true' from both old and new versions
+                    val mergedMovie = existingMovie.copy(
+                        isPopular = existingMovie.isPopular || newMovie.isPopular,
+                        isNowPlaying = existingMovie.isNowPlaying || newMovie.isNowPlaying,
+                        isTopRated = existingMovie.isTopRated || newMovie.isTopRated,
+                        isUpcoming = existingMovie.isUpcoming || newMovie.isUpcoming
+                    )
+                    updateExisting(mergedMovie)
+                }
+            }
+        }
+    }
+
 
     /**
      * Clears all cached movies for a category before inserting fresh data.
      * Called before insertMovies() during a refresh to avoid stale entries.
      */
-    @Query("DELETE FROM movies WHERE category = :category")
-    suspend fun deleteMoviesByCategory(category: MovieCategory)
+    @Query("DELETE FROM movies WHERE is_now_playing = 1 AND is_popular = 0 AND is_top_rated = 0 AND is_upcoming = 0 ")
+    suspend fun deleteMoviesByCategoryNowPlaying()
+
+    @Query("DELETE FROM movies WHERE is_popular = 1 AND is_now_playing = 0 AND is_top_rated = 0 AND is_upcoming = 0 ")
+    suspend fun deleteMoviesByCategoryPopular()
+
+    @Query("DELETE FROM movies WHERE is_top_rated = 1 AND is_now_playing = 0 AND is_popular = 0 AND is_upcoming = 0 ")
+    suspend fun deleteMoviesByCategoryTopRated()
+
+    @Query("DELETE FROM movies WHERE is_upcoming = 1 AND is_now_playing = 0 AND is_popular = 0 AND is_top_rated = 0 ")
+    suspend fun deleteMoviesByCategoryUpcoming()
 
     /**
      * Returns a single cached movie by ID — used to check if

@@ -6,15 +6,15 @@ import com.uansari.moviewise.data.remote.dto.MovieDetailDto
 import com.uansari.moviewise.data.remote.dto.MovieDto
 import com.uansari.moviewise.domain.model.CastMember
 import com.uansari.moviewise.domain.model.Movie
-import com.uansari.moviewise.domain.util.MovieCategory
 import com.uansari.moviewise.domain.model.MovieDetail
+import com.uansari.moviewise.domain.util.MovieCategory
 import com.uansari.moviewise.util.Constants
 
 /**
  * Converts a MovieDto (API response) to a Movie domain model.
  * category is passed in because the DTO doesn't know which list it came from.
  */
-fun MovieDto.toDomain(category: MovieCategory? = null): Movie = Movie(
+fun MovieDto.toDomain(): Movie = Movie(
     id = id,
     title = title,
     overview = overview.orEmpty(),
@@ -22,7 +22,6 @@ fun MovieDto.toDomain(category: MovieCategory? = null): Movie = Movie(
     backdropPath = Constants.backdropUrl(backdropPath),
     voteAverage = voteAverage,
     releaseDate = releaseDate.orEmpty(),
-    category = category
 )
 
 /**
@@ -41,8 +40,7 @@ fun MovieDetailDto.toDomain(): MovieDetail = MovieDetail(
     status = status.orEmpty(),
     tagline = tagline.orEmpty(),
     genres = genres.map { it.name },
-    cast = credits?.cast?.sortedBy { it.order }
-        ?.take(15)                 // Top 15 cast members
+    cast = credits?.cast?.sortedBy { it.order }?.take(15)                 // Top 15 cast members
         ?.map { it.toDomain() } ?: emptyList())
 
 fun CastMemberDto.toDomain(): CastMember = CastMember(
@@ -65,5 +63,8 @@ fun MovieDto.toEntity(category: MovieCategory): MovieEntity = MovieEntity(
     backdropPath = backdropPath,
     voteAverage = voteAverage,
     releaseDate = releaseDate.orEmpty(),
-    category = category
+    isNowPlaying = category == MovieCategory.NOW_PLAYING,
+    isPopular = category == MovieCategory.POPULAR,
+    isTopRated = category == MovieCategory.TOP_RATED,
+    isUpcoming = category == MovieCategory.UPCOMING,
 )

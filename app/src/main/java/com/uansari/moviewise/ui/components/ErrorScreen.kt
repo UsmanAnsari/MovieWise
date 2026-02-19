@@ -40,8 +40,8 @@ fun ErrorScreen(
         Icon(
             imageVector = Icons.Default.WifiOff,
             contentDescription = null,
-            modifier = Modifier.size(64.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
+            modifier = Modifier.size(70.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
         )
 
         Spacer(modifier = Modifier.height(16.dp))

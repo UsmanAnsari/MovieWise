@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
  */
 @Composable
 fun MovieCardShimmer(modifier: Modifier = Modifier) {
-    val brush = ShimmerBrush()
+    val brush = shimmerBrush()
 
     Column(modifier = modifier.width(130.dp)) {
         Box(

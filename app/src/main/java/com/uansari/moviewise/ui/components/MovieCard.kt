@@ -60,7 +60,7 @@ fun MovieCard(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(ShimmerBrush())
+                        .background(shimmerBrush())
                 )
             },
             error = {

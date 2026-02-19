@@ -24,7 +24,7 @@ import androidx.compose.ui.graphics.Brush
  *   Box(modifier = Modifier.background(ShimmerBrush()))
  */
 @Composable
-fun ShimmerBrush(): Brush {
+fun shimmerBrush(): Brush {
     val shimmerColors = listOf(
         MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
         MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),

@@ -80,10 +80,10 @@ class HomeViewModel @Inject constructor(
             // supervisorScope ensures one failing category doesn't
             // cancel the other three — each loads independently
             supervisorScope {
-                launch { collectPopular() }
-                launch { collectNowPlaying() }
-                launch { collectTopRated() }
                 launch { collectUpcoming() }
+                launch { collectNowPlaying() }
+                launch { collectPopular() }
+                launch { collectTopRated() }
             }
         }
     }

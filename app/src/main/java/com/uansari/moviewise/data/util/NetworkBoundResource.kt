@@ -85,7 +85,7 @@ fun <ResultType, RequestType> networkBoundResource(
             // "do I have data to keep showing, or do I show the error screen?"
             emit(
                 Resource.Error(
-                    message = throwable.message ?: "An unknown error occurred", data = cachedData
+                    message = throwable.toUserFriendlyMessage(), data = cachedData
                 )
             )
         }

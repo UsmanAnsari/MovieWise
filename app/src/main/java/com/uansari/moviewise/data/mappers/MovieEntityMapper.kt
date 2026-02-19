@@ -17,7 +17,10 @@ fun MovieEntity.toDomain(): Movie = Movie(
     backdropPath = Constants.backdropUrl(backdropPath),
     voteAverage = voteAverage,
     releaseDate = releaseDate,
-    category = category
+    isNowPlaying = isNowPlaying,
+    isPopular = isPopular,
+    isTopRated = isTopRated,
+    isUpcoming = isUpcoming,
 )
 
 /**
@@ -31,7 +34,6 @@ fun WatchlistEntity.toDomain(): Movie = Movie(
     backdropPath = Constants.backdropUrl(backdropPath),
     voteAverage = voteAverage,
     releaseDate = releaseDate,
-    category = null
 )
 
 
