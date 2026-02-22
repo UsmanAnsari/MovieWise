@@ -10,7 +10,7 @@
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.2.1-purple.svg?style=flat&logo=kotlin)](https://kotlinlang.org)
 [![Android](https://img.shields.io/badge/Android-29+-green.svg?style=flat&logo=android)](https://developer.android.com)
 [![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-1.12.3-blue.svg?style=flat&logo=jetpackcompose)](https://developer.android.com/jetpack/compose)
-[![Tests](https://img.shields.io/badge/tests-45%2B%20passing-brightgreen.svg?style=flat)](https://github.com/UsmanAnsari/MovieWise/actions)
+[![Tests](https://img.shields.io/badge/tests-50%2B%20passing-brightgreen.svg?style=flat)](https://github.com/UsmanAnsari/MovieWise/actions)
 
 ![Architecture](https://img.shields.io/badge/Architecture-Clean_Architecture-blue?style=for-the-badge)
 ![Pattern](https://img.shields.io/badge/Pattern-MVI-purple?style=for-the-badge)
@@ -42,7 +42,7 @@
 - **🗄️ Room Database** — Offline-capable watchlist with reactive Flow updates
 - **♾️ Paging 3** — Memory-efficient infinite scroll with built-in load states
 - **⚡ Flow Operators** — Debounce, distinctUntilChanged, flatMapLatest for search optimization
-- **🧪 45+ Tests** — Comprehensive unit and instrumentation test coverage
+- **🧪 50+ Tests** — Comprehensive unit and instrumentation test coverage
 - **🚀 CI/CD** — Automated testing and signed release builds via GitHub Actions
 
 ---
@@ -53,7 +53,7 @@
 
 | Home Screen | Search Results | Movie Detail | Watchlist |
 |:-----------:|:--------------:|:------------:|:---------:|
-| ![Home](screenshots/home.png) | ![Search](screenshots/search-results.png) | ![Detail](screenshots/detail.png) | ![Watchlist](screenshots/watchlist.png) |
+| ![Home](assets/screenshots/Home.png) | ![Search](assets/screenshots/Search.png) | ![Detail](assets/screenshots/Detail.png) | ![Watchlist](assets/screenshots/WatchList.png) |
 
 
 ---
@@ -61,7 +61,7 @@
   
   | Browse cached home content | Search with debounce | Manage fully-offline watchlist |
   |:-----------:|:-----------:|:-----------:|
-  | ![Dashboard](gif/home.gif) | ![Products](gif/Search.gif) | ![Stock Movements](gif/WatchList.gif) |
+  | ![Home](assets/gif/Home.gif) | ![Search](assets/gif/Search.gif) | ![WatchList](assets/gif/WatchList.gif) |
   
 ---
 </div>
@@ -219,7 +219,7 @@ MovieWise uses **Room** with two main entities.
 ---
 ## 🧪 Testing Strategy
 
-### Test Pyramid: 58+ Tests
+### Test Pyramid: 50+ Tests
 ```
            ╱╲
           ╱  ╲       8 UI Tests
@@ -329,7 +329,7 @@ app/src/main/java/com/usman/moviewise/
 │       ├── SearchMoviesUseCase.kt
 │       └── ...
 │
-├── 📂 ui/                   # Presentation/UI Layer
+├── 📂 ui/                             # Presentation/UI Layer
 │   ├── home/                          # Home screen (MVI)
 │   │   ├── HomeContract.kt            # State/Event/Effect
 │   │   ├── HomeViewModel.kt           # State management
@@ -504,7 +504,7 @@ MovieWise implements **9 Use Cases** following Single Responsibility Principle:
 | **Watchlist** | ✅ Fully Offline | Room database with Flow |
 | **Search** | ✅ API-only | Paging 3 with debounce |
 | **Detail** | ✅ API-first | No caching (deliberate choice) |
-| **Testing** | ✅ 58+ tests | Unit + instrumentation |
+| **Testing** | ✅ 50+ tests | Unit + instrumentation |
 | **CI/CD** | ✅ Automated | GitHub Actions with signed APKs |
 
 ### Production Enhancements
@@ -527,7 +527,7 @@ In a production app with millions of users, I would add:
 
 - [x] Phase 1: Foundation (Clean Architecture + MVI)
 - [x] Phase 2: Core Features (Browse, Search, Detail, Watchlist)
-- [x] Phase 3: Comprehensive Testing (58+ tests)
+- [x] Phase 3: Comprehensive Testing (50+ tests)
 - [x] Phase 4: CI/CD Pipeline (GitHub Actions)
 - [ ] Phase 5: Detail Screen Caching (RemoteMediator)
 - [ ] Phase 6: Firebase Integration (Auth + Cloud Sync)
@@ -555,8 +555,6 @@ In a production app with millions of users, I would add:
 ### ⭐ Star this repo if you find it helpful! ⭐
 
 **Built with ❤️ to demonstrate production-ready Android development**
-
-<sub>Last updated: Feb 2026</sub>
 
 </div>
 
